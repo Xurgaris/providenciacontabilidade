@@ -1805,9 +1805,11 @@ About .about-section {
   .about-section {
     padding: 40px 20px;
   }
-  .left-column,
-  .right-column {
+  .left-column {
     padding: 40px 20px;
+  }
+  .right-column {
+    display: none;
   }
   .title {
     font-size: 2rem;
