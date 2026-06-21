@@ -135,6 +135,7 @@
 
       var name = form.name.value.trim();
       var email = form.email.value.trim();
+      var phone = form.phone.value.trim();
       var message = form.message.value.trim();
       var emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
 
@@ -146,18 +147,16 @@
       submitBtn.disabled = true;
       submitBtn.textContent = "Enviando...";
 
-      var subject = encodeURIComponent("Contato pelo site — " + name);
-      var body = encodeURIComponent(
-        "Nome: " + name +
-        "\nE-mail: " + email +
-        "\nTelefone: " + form.phone.value.trim() +
-        "\n\nMensagem:\n" + message
+      var whatsappMessage = encodeURIComponent(
+        "Olá! Meu nome é " + name + ".\n\n" +
+        "E-mail: " + email + "\n" +
+        "Telefone: " + (phone || "Não informado") + "\n\n" +
+        "Mensagem:\n" + message
       );
 
       setTimeout(function () {
-        window.location.href =
-          "mailto:contato@providenciacontabilidade.com.br?subject=" + subject + "&body=" + body;
-        toast("Mensagem enviada! Entraremos em contato em breve.", "success");
+        window.location.href = "https://wa.me/5566999999999?text=" + whatsappMessage;
+        toast("Redirecionando para o WhatsApp...", "success");
         form.reset();
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Enviar mensagem <i data-lucide="send"></i>';
