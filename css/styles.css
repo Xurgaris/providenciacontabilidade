@@ -1176,17 +1176,18 @@ About .about-section {
     overflow: hidden;
   }
 
-  #servicos .accordion-wrapper {
-    display: flex;
-    width: 100%;
-    gap: 0;
-    overflow: hidden;
-    padding: 0;
-    scroll-snap-type: none;
-    transition: transform 0.4s ease;
-    touch-action: pan-y pinch-zoom;
-    will-change: transform;
-  }
+#servicos .accordion-wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+  width: 100%;
+  gap: 0;
+  overflow: visible;
+  padding: 0;
+  scroll-snap-type: none;
+  transition: transform 0.4s ease;
+  touch-action: pan-y;
+  will-change: transform;
+}
 
   #servicos .accordion-item,
   #servicos .accordion-item.active {
