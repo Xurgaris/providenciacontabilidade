@@ -2,8 +2,18 @@
    Providência Contabilidade — Landing Page JS (vanilla)
    Sem dependências de build. Apenas Lucide via CDN para ícones.
    ========================================================= */
+
 (function () {
   "use strict";
+
+  /* ---------- Utilitário: executar quando o DOM estiver pronto ---------- */
+  function ready(callback) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", callback);
+    } else {
+      callback();
+    }
+  }
 
   /* ---------- Ícones (Lucide) ---------- */
   function renderIcons() {
@@ -18,8 +28,15 @@
 
   function onScroll() {
     var y = window.scrollY;
-    if (header && progress) {
-      header.classList.toggle("solid", y > 28 || header.classList.contains("menu-open"));
+
+    if (header) {
+      header.classList.toggle(
+        "solid",
+        y > 28 || header.classList.contains("menu-open")
+      );
+    }
+
+    if (progress) {
       var height = document.documentElement.scrollHeight - window.innerHeight;
       var ratio = height > 0 ? Math.min(y / height, 1) : 0;
       progress.style.transform = "scaleX(" + ratio + ")";
@@ -29,96 +46,115 @@
   window.addEventListener("scroll", onScroll, { passive: true });
 
   /* ---------- Menu mobile ---------- */
-  var menuToggle = document.getElementById("menuToggle");
-  var mobileNav = document.getElementById("mobileNav");
+  function initMobileMenu() {
+    var menuToggle = document.getElementById("menuToggle");
+    var mobileNav = document.getElementById("mobileNav");
 
-  function setMenu(open) {
-    if (!header || !menuToggle) return;
-    header.classList.toggle("menu-open", open);
-    menuToggle.setAttribute("aria-expanded", String(open));
-    menuToggle.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
-    document.body.style.overflow = open ? "hidden" : "";
-    onScroll();
-  }
+    function setMenu(open) {
+      if (!header || !menuToggle) return;
 
-  if (menuToggle && mobileNav) {
-    menuToggle.addEventListener("click", function () {
-      setMenu(!header.classList.contains("menu-open"));
-    });
+      header.classList.toggle("menu-open", open);
+      menuToggle.setAttribute("aria-expanded", String(open));
+      menuToggle.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
+      document.body.style.overflow = open ? "hidden" : "";
 
-    mobileNav.querySelectorAll("a").forEach(function (link) {
-      link.addEventListener("click", function () {
-        setMenu(false);
+      onScroll();
+    }
+
+    if (menuToggle && mobileNav) {
+      menuToggle.addEventListener("click", function () {
+        setMenu(!header.classList.contains("menu-open"));
       });
-    });
+
+      mobileNav.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () {
+          setMenu(false);
+        });
+      });
+    }
   }
 
   /* ---------- Reveal on scroll (IntersectionObserver) ---------- */
-  var revealEls = document.querySelectorAll("[data-reveal]");
+  function initRevealOnScroll() {
+    var revealEls = document.querySelectorAll("[data-reveal]");
 
-  revealEls.forEach(function (el) {
-    var delay = el.getAttribute("data-delay");
-    if (delay) el.style.transitionDelay = delay + "ms";
-  });
+    revealEls.forEach(function (el) {
+      var delay = el.getAttribute("data-delay");
+      if (delay) el.style.transitionDelay = delay + "ms";
+    });
 
-  if ("IntersectionObserver" in window) {
-    var observer = new IntersectionObserver(
-      function (entries, obs) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            obs.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: "0px 0px -80px 0px" }
-    );
-    revealEls.forEach(function (el) {
-      observer.observe(el);
-    });
-  } else {
-    revealEls.forEach(function (el) {
-      el.classList.add("is-visible");
-    });
+    if ("IntersectionObserver" in window) {
+      var observer = new IntersectionObserver(
+        function (entries, obs) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              obs.unobserve(entry.target);
+            }
+          });
+        },
+        {
+          threshold: 0.1,
+          rootMargin: "0px 0px -80px 0px"
+        }
+      );
+
+      revealEls.forEach(function (el) {
+        observer.observe(el);
+      });
+    } else {
+      revealEls.forEach(function (el) {
+        el.classList.add("is-visible");
+      });
+    }
   }
 
   /* ---------- Accordion (FAQ) — single/collapsible ---------- */
-  var faqItems = document.querySelectorAll(".faq-item");
+  function initFaqAccordion() {
+    var faqItems = document.querySelectorAll(".faq-item");
 
-  faqItems.forEach(function (item) {
-    var trigger = item.querySelector(".faq-item__trigger");
-    var content = item.querySelector(".faq-item__content");
+    faqItems.forEach(function (item) {
+      var trigger = item.querySelector(".faq-item__trigger");
+      var content = item.querySelector(".faq-item__content");
 
-    if (trigger && content) {
-      trigger.addEventListener("click", function () {
-        var isOpen = item.classList.contains("open");
+      if (trigger && content) {
+        trigger.addEventListener("click", function () {
+          var isOpen = item.classList.contains("open");
 
-        faqItems.forEach(function (other) {
-          other.classList.remove("open");
-          var c = other.querySelector(".faq-item__content");
-          if (c) c.style.maxHeight = null;
+          faqItems.forEach(function (other) {
+            other.classList.remove("open");
+
+            var c = other.querySelector(".faq-item__content");
+            if (c) c.style.maxHeight = null;
+          });
+
+          if (!isOpen) {
+            item.classList.add("open");
+            content.style.maxHeight = content.scrollHeight + "px";
+          }
         });
-
-        if (!isOpen) {
-          item.classList.add("open");
-          content.style.maxHeight = content.scrollHeight + "px";
-        }
-      });
-    }
-  });
+      }
+    });
+  }
 
   /* ---------- Toast ---------- */
   function toast(message, type) {
     var stack = document.getElementById("toastStack");
     if (!stack) return;
+
     var el = document.createElement("div");
     el.className = "toast " + (type || "");
     el.textContent = message;
+
     stack.appendChild(el);
-    void el.offsetWidth; // Força reflow
+
+    void el.offsetWidth;
+
     el.classList.add("show");
+
     setTimeout(function () {
       el.classList.remove("show");
+
       setTimeout(function () {
         el.remove();
       }, 300);
@@ -126,10 +162,12 @@
   }
 
   /* ---------- Formulário de contato ---------- */
-  var form = document.getElementById("contactForm");
-  var submitBtn = document.getElementById("submitBtn");
+  function initContactForm() {
+    var form = document.getElementById("contactForm");
+    var submitBtn = document.getElementById("submitBtn");
 
-  if (form && submitBtn) {
+    if (!form || !submitBtn) return;
+
     form.addEventListener("submit", function (e) {
       e.preventDefault();
 
@@ -148,158 +186,262 @@
       submitBtn.textContent = "Enviando...";
 
       var whatsappMessage = encodeURIComponent(
-        "Olá! Meu nome é " + name + ".\n\n" +
-        "E-mail: " + email + "\n" +
-        "Telefone: " + (phone || "Não informado") + "\n\n" +
-        "Mensagem:\n" + message
+        "Olá! Meu nome é " +
+          name +
+          ".\n\n" +
+          "E-mail: " +
+          email +
+          "\n" +
+          "Telefone: " +
+          (phone || "Não informado") +
+          "\n\n" +
+          "Mensagem:\n" +
+          message
       );
 
       setTimeout(function () {
-        window.location.href = "https://wa.me/5566999999999?text=" + whatsappMessage;
+        window.location.href =
+          "https://wa.me/5566999999999?text=" + whatsappMessage;
+
         toast("Redirecionando para o WhatsApp...", "success");
+
         form.reset();
+
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Enviar mensagem <i data-lucide="send"></i>';
+
         renderIcons();
       }, 600);
     });
   }
 
   /* ---------- Ano no rodapé ---------- */
-  var yearEl = document.getElementById("year");
-  if (yearEl) {
-    yearEl.textContent = String(new Date().getFullYear());
+  function initFooterYear() {
+    var yearEl = document.getElementById("year");
+
+    if (yearEl) {
+      yearEl.textContent = String(new Date().getFullYear());
+    }
   }
 
-  /* ---------- NOVO: Acordeão de Imagens (Gen-AI Section) ---------- */
-  function initImageAccordion() {
-    var accordionContainer = document.getElementById('accordionContainer');
-    if (!accordionContainer) return;
-    
-    var items = accordionContainer.querySelectorAll('.accordion-item');
-    items.forEach(function (item) {
-      item.addEventListener('mouseenter', function () {
-        items.forEach(function (el) { el.classList.remove('active'); });
-        item.classList.add('active');
-      });
-    });
-  }
+  /* ---------- Cards de Serviços: carrossel + flip ---------- */
+  function initServicesCards() {
+    var accordionContainer = document.querySelector("#accordionContainer");
+    var cards = document.querySelectorAll("#servicos .accordion-item");
 
-/* ---------- Carrossel infinito de clientes ---------- */
-function initClientsMarquee() {
-  var clientsList = document.querySelector(".clients__list");
+    if (!accordionContainer || !cards.length) return;
 
-  if (!clientsList) return;
+    var currentCard = 0;
+    var startX = 0;
+    var startY = 0;
+    var isDragging = false;
+    var suppressClickUntil = 0;
 
-  var originalItems = Array.prototype.slice.call(clientsList.children);
+    function isMobile() {
+      return window.matchMedia("(max-width: 768px)").matches;
+    }
 
-  if (!originalItems.length) return;
-
-  if (clientsList.getAttribute("data-marquee-ready") !== "true") {
-    originalItems.forEach(function (item) {
-      var clone = item.cloneNode(true);
-      clone.setAttribute("aria-hidden", "true");
-      clientsList.appendChild(clone);
-    });
-
-    clientsList.setAttribute("data-marquee-ready", "true");
-  }
-
-  var position = 0;
-  var speed = 0.7;
-  var paused = false;
-
- 
-  
-  function animate() {
-    if (!paused) {
-      position -= speed;
-
-      var halfWidth = clientsList.scrollWidth / 2;
-
-      if (Math.abs(position) >= halfWidth) {
-        position = 0;
+    function updateCarousel() {
+      if (isMobile()) {
+        accordionContainer.style.transform =
+          "translateX(-" + currentCard * 100 + "%)";
+      } else {
+        accordionContainer.style.transform = "";
       }
 
-      clientsList.style.transform = "translate3d(" + position + "px, 0, 0)";
+      cards.forEach(function (card, index) {
+        if (index !== currentCard) {
+          card.classList.remove("is-flipped");
+        }
+      });
     }
 
-    requestAnimationFrame(animate);
+    function goToCard(index) {
+      currentCard = Math.max(0, Math.min(index, cards.length - 1));
+      updateCarousel();
+    }
+
+    function handleSwipe(diffX, diffY) {
+      if (!isMobile()) return;
+
+      if (Math.abs(diffX) < 45 || Math.abs(diffX) < Math.abs(diffY)) {
+        return;
+      }
+
+      suppressClickUntil = Date.now() + 350;
+
+      var activeCard = cards[currentCard];
+      var direction = diffX < 0 ? 1 : -1;
+
+      if (!activeCard.classList.contains("is-flipped")) {
+        activeCard.classList.add("is-flipped");
+        return;
+      }
+
+      activeCard.classList.remove("is-flipped");
+      goToCard(currentCard + direction);
+    }
+
+    cards.forEach(function (card, index) {
+      card.addEventListener("click", function () {
+        if (Date.now() < suppressClickUntil) return;
+
+        if (isMobile()) {
+          if (index === currentCard) {
+            card.classList.toggle("is-flipped");
+          }
+        } else {
+          card.classList.toggle("is-flipped");
+        }
+      });
+    });
+
+    if (window.PointerEvent) {
+      accordionContainer.addEventListener("pointerdown", function (event) {
+        if (!isMobile()) return;
+
+        isDragging = true;
+        startX = event.clientX;
+        startY = event.clientY;
+
+        if (accordionContainer.setPointerCapture) {
+          try {
+            accordionContainer.setPointerCapture(event.pointerId);
+          } catch (error) {
+            // Evita erro em navegadores que não suportam captura corretamente.
+          }
+        }
+      });
+
+      accordionContainer.addEventListener("pointerup", function (event) {
+        if (!isMobile() || !isDragging) return;
+
+        isDragging = false;
+
+        var endX = event.clientX;
+        var endY = event.clientY;
+
+        var diffX = endX - startX;
+        var diffY = endY - startY;
+
+        handleSwipe(diffX, diffY);
+      });
+
+      accordionContainer.addEventListener("pointercancel", function () {
+        isDragging = false;
+      });
+    } else {
+      accordionContainer.addEventListener(
+        "touchstart",
+        function (event) {
+          if (!isMobile()) return;
+
+          startX = event.touches[0].clientX;
+          startY = event.touches[0].clientY;
+        },
+        { passive: true }
+      );
+
+      accordionContainer.addEventListener(
+        "touchend",
+        function (event) {
+          if (!isMobile()) return;
+
+          var endX = event.changedTouches[0].clientX;
+          var endY = event.changedTouches[0].clientY;
+
+          var diffX = endX - startX;
+          var diffY = endY - startY;
+
+          handleSwipe(diffX, diffY);
+        },
+        { passive: true }
+      );
+    }
+
+    window.addEventListener("resize", function () {
+      goToCard(currentCard);
+    });
+
+    goToCard(0);
   }
 
-  animate();
-}
+  /* ---------- Carrossel infinito de clientes ---------- */
+  function initClientsMarquee() {
+    var clientsList = document.querySelector(".clients__list");
 
-  /* ---------- Blog Cards: buscar 3 posts mais recentes do Firebase ---------- */
-  function initBlogCards() {
-    var firebaseConfig = {
-      apiKey: "AIzaSyCKqpE1brE6kHYmvJrKMVfpI3AJmyh61zM",
-      authDomain: "contabilidadecampoverde-416cf.firebaseapp.com",
-      projectId: "contabilidadecampoverde-416cf",
-      storageBucket: "contabilidadecampoverde-416cf.firebasestorage.app",
-      messagingSenderId: "207228669111",
-      appId: "1:207228669111:web:d59374813554d0180f9132"
-    };
+    if (!clientsList) return;
 
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
+    var originalItems = Array.prototype.slice.call(clientsList.children);
+
+    if (!originalItems.length) return;
+
+    if (clientsList.getAttribute("data-marquee-ready") !== "true") {
+      originalItems.forEach(function (item) {
+        var clone = item.cloneNode(true);
+        clone.setAttribute("aria-hidden", "true");
+        clientsList.appendChild(clone);
+      });
+
+      clientsList.setAttribute("data-marquee-ready", "true");
     }
 
-    var db = firebase.firestore();
+    var position = 0;
+    var speed = 0.7;
+    var paused = false;
 
-    db.collection("posts")
-      .where("status", "==", "published")
-      .orderBy("publishedAt", "desc")
-      .limit(3)
-      .get()
-      .then(function(snapshot) {
-        var cards = [
-          document.getElementById("blog-card-1"),
-          document.getElementById("blog-card-2"),
-          document.getElementById("blog-card-3")
-        ];
+    clientsList.addEventListener("mouseenter", function () {
+      paused = true;
+    });
 
-        if (!snapshot.empty) {
-          snapshot.docs.forEach(function(doc, index) {
-            var post = doc.data();
-            var card = cards[index];
+    clientsList.addEventListener("mouseleave", function () {
+      paused = false;
+    });
 
-            if (card) {
-              var cat = card.querySelector(".post-card__cat");
-              var date = card.querySelector(".post-card__date");
-              var title = card.querySelector("h3");
-              var excerpt = card.querySelector(".post-card__excerpt");
-              var link = card.querySelector(".post-card__more");
-              var imgDiv = card.querySelector(".post-card__img div");
+    function animate() {
+      if (!paused) {
+        position -= speed;
 
-              if (cat) cat.textContent = post.tags && post.tags.length > 0 ? post.tags[0] : "Artigo";
-              if (date) {
-                var pubDate = post.publishedAt ? new Date(post.publishedAt.toMillis ? post.publishedAt.toMillis() : post.publishedAt) : new Date();
-                date.innerHTML = '<i data-lucide="calendar-days"></i> ' + pubDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
-              }
-              if (title) title.textContent = post.title || "";
-              if (excerpt) excerpt.textContent = post.excerpt || "";
-              if (link) link.parentElement.href = "blog-firebase/index.html?slug=" + (post.slug || "");
-              if (imgDiv && post.coverImage && post.coverImage.url) {
-                imgDiv.style.background = "url(" + post.coverImage.url + ") center/cover no-repeat";
-              }
-            }
-          });
+        var halfWidth = clientsList.scrollWidth / 2;
+
+        if (Math.abs(position) >= halfWidth) {
+          position = 0;
         }
 
-        if (window.lucide && typeof window.lucide.createIcons === "function") {
-          window.lucide.createIcons();
-        }
-      })
-      .catch(function(error) {
-        console.error("Erro ao buscar posts do blog:", error);
-      });
+        clientsList.style.transform =
+          "translate3d(" + position + "px, 0, 0)";
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
   }
 
   /* ---------- Init Geral da Aplicação ---------- */
-  renderIcons();
-  onScroll();
-  initImageAccordion();
-  initClientsMarquee();
-  initBlogCards();
+  ready(function () {
+    renderIcons();
+    onScroll();
+
+    initMobileMenu();
+    initRevealOnScroll();
+    initFaqAccordion();
+    initContactForm();
+    initFooterYear();
+    initServicesCards();
+    initClientsMarquee();
+
+    /*
+      Mantive essas chamadas de forma segura.
+      Se essas funções existirem em outro arquivo, elas serão executadas.
+      Se não existirem, o JavaScript não quebra.
+    */
+    if (typeof initImageAccordion === "function") {
+      initImageAccordion();
+    }
+
+    if (typeof initBlogCards === "function") {
+      initBlogCards();
+    }
+  });
 })();
