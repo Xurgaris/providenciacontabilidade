@@ -201,7 +201,7 @@
 
       setTimeout(function () {
         window.location.href =
-          "https://wa.me/5566996764266?text=" + whatsappMessage;
+          "https://wa.me/5566996958300?text=" + whatsappMessage;
 
         toast("Redirecionando para o WhatsApp...", "success");
 
