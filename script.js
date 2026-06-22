@@ -418,6 +418,172 @@
     animate();
   }
 
+  /* ---------- Dados do Blog (para cards da home) ---------- */
+  var blogPostsHome = [
+    {
+      id: 1,
+      title: "Como organizar a contabilidade da sua empresa antes que os problemas apareçam",
+      slug: "como-organizar-contabilidade-empresa",
+      category: "Gestão Contábil",
+      image: "https://placehold.co/600x400/1e40af/ffffff?text=Contabilidade",
+      publishedAt: "2026-06-22T09:30:00",
+      readTime: "5 min",
+      excerpt: "A contabilidade não deve ser lembrada apenas quando o imposto vence. Veja como transformar números em controle, previsibilidade e segurança."
+    },
+    {
+      id: 2,
+      title: "Simples Nacional: quando ele ajuda e quando pode limitar o crescimento",
+      slug: "simples-nacional-ajuda-ou-limita",
+      category: "Impostos",
+      image: "https://placehold.co/600x400/991b1b/ffffff?text=Impostos",
+      publishedAt: "2026-06-20T14:10:00",
+      readTime: "6 min",
+      excerpt: "O Simples Nacional pode ser vantajoso, mas nem sempre é a melhor escolha. Entenda quando vale a pena revisar o enquadramento tributário."
+    },
+    {
+      id: 3,
+      title: "MEI precisa de contador? Entenda onde começam os riscos",
+      slug: "mei-precisa-de-contador",
+      category: "MEI",
+      image: "https://placehold.co/600x400/166534/ffffff?text=MEI",
+      publishedAt: "2026-06-18T11:45:00",
+      readTime: "4 min",
+      excerpt: "O MEI é simples, mas não é livre de obrigações. Veja em quais situações o apoio contábil evita problemas e prepara a evolução do negócio."
+    },
+    {
+      id: 4,
+      title: "Fluxo de caixa: o relatório que todo empresário deveria olhar toda semana",
+      slug: "fluxo-de-caixa-empresarial",
+      category: "Gestão Financeira",
+      image: "https://placehold.co/600x400/581c87/ffffff?text=Fluxo+de+Caixa",
+      publishedAt: "2026-06-16T16:20:00",
+      readTime: "5 min",
+      excerpt: "Vender bem não significa ter dinheiro sobrando. O fluxo de caixa mostra se a empresa realmente consegue sustentar suas operações."
+    },
+    {
+      id: 5,
+      title: "Pró-labore: por que o dono da empresa não deve retirar dinheiro sem controle",
+      slug: "pro-labore-retirada-socios",
+      category: "Sócios",
+      image: "https://placehold.co/600x400/9a3412/ffffff?text=Pro-Labore",
+      publishedAt: "2026-06-14T10:00:00",
+      readTime: "5 min",
+      excerpt: "Misturar finanças pessoais e empresariais prejudica a gestão e pode gerar riscos fiscais. O pró-labore ajuda a profissionalizar a retirada dos sócios."
+    },
+    {
+      id: 6,
+      title: "Abertura de empresa: o que decidir antes de emitir o primeiro CNPJ",
+      slug: "abertura-de-empresa-cnpj",
+      category: "Abertura de Empresa",
+      image: "https://placehold.co/600x400/854d0e/ffffff?text=Abertura+de+Empresa",
+      publishedAt: "2026-06-12T13:40:00",
+      readTime: "6 min",
+      excerpt: "Abrir uma empresa não é apenas escolher um nome. Natureza jurídica, CNAE, regime tributário e planejamento inicial fazem diferença."
+    },
+    {
+      id: 7,
+      title: "Nota fiscal: erros simples que podem gerar dor de cabeça para a empresa",
+      slug: "erros-na-emissao-de-nota-fiscal",
+      category: "Fiscal",
+      image: "https://placehold.co/600x400/9d174d/ffffff?text=Nota+Fiscal",
+      publishedAt: "2026-06-10T08:50:00",
+      readTime: "4 min",
+      excerpt: "Emitir nota fiscal parece simples, mas erros em serviço, código, valor ou imposto podem gerar inconsistências e retrabalho."
+    },
+    {
+      id: 8,
+      title: "Folha de pagamento: por que pequenas falhas podem sair caro",
+      slug: "folha-de-pagamento-cuidados",
+      category: "Departamento Pessoal",
+      image: "https://placehold.co/600x400/0e7490/ffffff?text=Folha+de+Pagamento",
+      publishedAt: "2026-06-08T15:15:00",
+      readTime: "5 min",
+      excerpt: "Salários, encargos, férias, rescisões e benefícios exigem controle. Uma folha mal calculada afeta caixa, equipe e obrigações legais."
+    },
+    {
+      id: 9,
+      title: "Planejamento tributário: pagar menos imposto sem colocar a empresa em risco",
+      slug: "planejamento-tributario-empresa",
+      category: "Impostos",
+      image: "https://placehold.co/600x400/7c2d12/ffffff?text=Planejamento+Tributário",
+      publishedAt: "2026-06-06T09:05:00",
+      readTime: "7 min",
+      excerpt: "Reduzir impostos de forma legal exige análise, projeção e acompanhamento. O planejamento tributário evita decisões baseadas em achismo."
+    },
+    {
+      id: 10,
+      title: "Indicadores financeiros que mostram se sua empresa está saudável",
+      slug: "indicadores-financeiros-empresa-saudavel",
+      category: "Gestão Financeira",
+      image: "https://placehold.co/600x400/4c1d95/ffffff?text=Indicadores+Financeiros",
+      publishedAt: "2026-06-04T17:30:00",
+      readTime: "6 min",
+      excerpt: "Lucro, margem, endividamento e caixa precisam ser acompanhados juntos. Um único número não mostra a realidade completa do negócio."
+    }
+  ];
+
+  function formatDateHome(dateString) {
+    var date = new Date(dateString);
+    return date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    });
+  }
+
+  function initBlogCards() {
+    var card1 = document.getElementById("blog-card-1");
+    var card2 = document.getElementById("blog-card-2");
+    var card3 = document.getElementById("blog-card-3");
+
+    if (!card1 || !card2 || !card3) return;
+
+    // Ordenar posts por data (mais recentes primeiro) e pegar os 3 últimos
+    var sortedPosts = blogPostsHome.slice().sort(function(a, b) {
+      return new Date(b.publishedAt) - new Date(a.publishedAt);
+    });
+
+    var latestPosts = sortedPosts.slice(0, 3);
+
+    // Atualizar card 1
+    if (latestPosts[0]) {
+      var post1 = latestPosts[0];
+      card1.querySelector(".post-card__img div").style.backgroundImage = "linear-gradient(135deg, rgba(5, 5, 5, 0.10), rgba(5, 5, 5, 0.68)), url('" + post1.image + "')";
+      card1.querySelector(".post-card__cat").textContent = post1.category;
+      card1.querySelector(".post-card__date").innerHTML = '<i data-lucide="calendar-days"></i> ' + formatDateHome(post1.publishedAt);
+      card1.querySelector("h3").textContent = post1.title;
+      card1.querySelector(".post-card__excerpt").textContent = post1.excerpt;
+      card1.querySelector("a").href = "blog/blog.html";
+    }
+
+    // Atualizar card 2
+    if (latestPosts[1]) {
+      var post2 = latestPosts[1];
+      card2.querySelector(".post-card__img div").style.backgroundImage = "linear-gradient(135deg, rgba(5, 5, 5, 0.10), rgba(5, 5, 5, 0.68)), url('" + post2.image + "')";
+      card2.querySelector(".post-card__cat").textContent = post2.category;
+      card2.querySelector(".post-card__date").innerHTML = '<i data-lucide="calendar-days"></i> ' + formatDateHome(post2.publishedAt);
+      card2.querySelector("h3").textContent = post2.title;
+      card2.querySelector(".post-card__excerpt").textContent = post2.excerpt;
+      card2.querySelector("a").href = "blog/blog.html";
+    }
+
+    // Atualizar card 3
+    if (latestPosts[2]) {
+      var post3 = latestPosts[2];
+      card3.querySelector(".post-card__img div").style.backgroundImage = "linear-gradient(135deg, rgba(5, 5, 5, 0.10), rgba(5, 5, 5, 0.68)), url('" + post3.image + "')";
+      card3.querySelector(".post-card__cat").textContent = post3.category;
+      card3.querySelector(".post-card__date").innerHTML = '<i data-lucide="calendar-days"></i> ' + formatDateHome(post3.publishedAt);
+      card3.querySelector("h3").textContent = post3.title;
+      card3.querySelector(".post-card__excerpt").textContent = post3.excerpt;
+      card3.querySelector("a").href = "blog/blog.html";
+    }
+
+    // Re-renderizar ícones Lucide
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons();
+    }
+  }
+
   /* ---------- Init Geral da Aplicação ---------- */
   ready(function () {
     renderIcons();
@@ -430,6 +596,7 @@
     initFooterYear();
     initServicesCards();
     initClientsMarquee();
+    initBlogCards();
 
     /*
       Mantive essas chamadas de forma segura.
@@ -438,10 +605,6 @@
     */
     if (typeof initImageAccordion === "function") {
       initImageAccordion();
-    }
-
-    if (typeof initBlogCards === "function") {
-      initBlogCards();
     }
   });
 })();
