@@ -363,6 +363,21 @@
       goToCard(currentCard);
     });
 
+    var prevBtn = document.getElementById("carouselPrev");
+    var nextBtn = document.getElementById("carouselNext");
+
+    if (prevBtn) {
+      prevBtn.addEventListener("click", function () {
+        goToCard(currentCard - 1);
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener("click", function () {
+        goToCard(currentCard + 1);
+      });
+    }
+
     goToCard(0);
   }
 
