@@ -224,7 +224,7 @@
     }
   }
 
-  function initServicesCards() {
+function initServicesCards() {
   var accordionContainer = document.querySelector("#accordionContainer");
   var cards = document.querySelectorAll("#servicos .accordion-item");
 
@@ -233,36 +233,35 @@
   var currentCard = 0;
   var startX = 0;
   var startY = 0;
-  var isDragging = false;
   var suppressClickUntil = 0;
 
   var prevBtn = document.getElementById("carouselPrev");
   var nextBtn = document.getElementById("carouselNext");
 
-  function isCarouselMode() {
-    return window.matchMedia("(max-width: 1440px)").matches;
+  function isMobile() {
+    return window.matchMedia("(max-width: 768px)").matches;
   }
 
   function updateArrows() {
     if (!prevBtn || !nextBtn) return;
 
-    prevBtn.disabled = currentCard === 0;
-    nextBtn.disabled = currentCard === cards.length - 1;
+    var isFirst = currentCard === 0;
+    var isLast = currentCard === cards.length - 1;
 
-    prevBtn.classList.toggle("is-disabled", currentCard === 0);
-    nextBtn.classList.toggle("is-disabled", currentCard === cards.length - 1);
+    prevBtn.disabled = isFirst;
+    nextBtn.disabled = isLast;
+
+    prevBtn.classList.toggle("is-disabled", isFirst);
+    nextBtn.classList.toggle("is-disabled", isLast);
   }
 
   function updateCarousel() {
-    if (isCarouselMode()) {
-      var firstCardOffset = cards[0].offsetLeft;
-      var activeCardOffset = cards[currentCard].offsetLeft;
-      var offset = activeCardOffset - firstCardOffset;
+    var firstCardOffset = cards[0].offsetLeft;
+    var activeCardOffset = cards[currentCard].offsetLeft;
+    var offset = activeCardOffset - firstCardOffset;
 
-      accordionContainer.style.transform = "translate3d(-" + offset + "px, 0, 0)";
-    } else {
-      accordionContainer.style.transform = "";
-    }
+    accordionContainer.style.transform =
+      "translate3d(-" + offset + "px, 0, 0)";
 
     cards.forEach(function (card, index) {
       if (index !== currentCard) {
@@ -279,7 +278,7 @@
   }
 
   function handleSwipe(diffX, diffY) {
-    if (!isCarouselMode()) return;
+    if (!isMobile()) return;
 
     if (Math.abs(diffX) < 45 || Math.abs(diffX) < Math.abs(diffY)) {
       return;
@@ -303,72 +302,57 @@
     card.addEventListener("click", function () {
       if (Date.now() < suppressClickUntil) return;
 
-      if (isCarouselMode()) {
-        if (index === currentCard) {
-          card.classList.toggle("is-flipped");
-        } else {
-          goToCard(index);
-        }
-      } else {
+      if (index === currentCard) {
         card.classList.toggle("is-flipped");
+      } else {
+        goToCard(index);
       }
     });
   });
 
-  if (window.PointerEvent) {
-    accordionContainer.addEventListener("pointerdown", function (event) {
-      if (!isCarouselMode()) return;
+  /*
+    Mobile: permite arrastar.
+    Notebook/Desktop: não tem touch/trackpad horizontal.
+  */
+  accordionContainer.addEventListener(
+    "touchstart",
+    function (event) {
+      if (!isMobile()) return;
 
-      isDragging = true;
-      startX = event.clientX;
-      startY = event.clientY;
+      startX = event.touches[0].clientX;
+      startY = event.touches[0].clientY;
+    },
+    { passive: true }
+  );
 
-      if (accordionContainer.setPointerCapture) {
-        try {
-          accordionContainer.setPointerCapture(event.pointerId);
-        } catch (error) {}
-      }
-    });
+  accordionContainer.addEventListener(
+    "touchend",
+    function (event) {
+      if (!isMobile()) return;
 
-    accordionContainer.addEventListener("pointerup", function (event) {
-      if (!isCarouselMode() || !isDragging) return;
-
-      isDragging = false;
-
-      var diffX = event.clientX - startX;
-      var diffY = event.clientY - startY;
+      var diffX = event.changedTouches[0].clientX - startX;
+      var diffY = event.changedTouches[0].clientY - startY;
 
       handleSwipe(diffX, diffY);
-    });
+    },
+    { passive: true }
+  );
 
-    accordionContainer.addEventListener("pointercancel", function () {
-      isDragging = false;
-    });
-  } else {
-    accordionContainer.addEventListener(
-      "touchstart",
-      function (event) {
-        if (!isCarouselMode()) return;
+  /*
+    Bloqueia rolagem horizontal do touchpad em notebook/desktop
+    sem atrapalhar o scroll vertical da página.
+  */
+  accordionContainer.addEventListener(
+    "wheel",
+    function (event) {
+      if (isMobile()) return;
 
-        startX = event.touches[0].clientX;
-        startY = event.touches[0].clientY;
-      },
-      { passive: true }
-    );
-
-    accordionContainer.addEventListener(
-      "touchend",
-      function (event) {
-        if (!isCarouselMode()) return;
-
-        var diffX = event.changedTouches[0].clientX - startX;
-        var diffY = event.changedTouches[0].clientY - startY;
-
-        handleSwipe(diffX, diffY);
-      },
-      { passive: true }
-    );
-  }
+      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+        event.preventDefault();
+      }
+    },
+    { passive: false }
+  );
 
   if (prevBtn) {
     prevBtn.addEventListener("click", function (event) {
@@ -392,7 +376,6 @@
 
   goToCard(0);
 }
-
   /* ---------- Carrossel infinito de clientes ---------- */
   function initClientsMarquee() {
     var clientsList = document.querySelector(".clients__list");
