@@ -224,162 +224,174 @@
     }
   }
 
-  /* ---------- Cards de Serviços: carrossel + flip ---------- */
   function initServicesCards() {
-    var accordionContainer = document.querySelector("#accordionContainer");
-    var cards = document.querySelectorAll("#servicos .accordion-item");
+  var accordionContainer = document.querySelector("#accordionContainer");
+  var cards = document.querySelectorAll("#servicos .accordion-item");
 
-    if (!accordionContainer || !cards.length) return;
+  if (!accordionContainer || !cards.length) return;
 
-    var currentCard = 0;
-    var startX = 0;
-    var startY = 0;
-    var isDragging = false;
-    var suppressClickUntil = 0;
+  var currentCard = 0;
+  var startX = 0;
+  var startY = 0;
+  var isDragging = false;
+  var suppressClickUntil = 0;
 
-    function isMobile() {
-      return window.matchMedia("(max-width: 768px)").matches;
-    }
+  var prevBtn = document.getElementById("carouselPrev");
+  var nextBtn = document.getElementById("carouselNext");
 
-    function updateCarousel() {
-      if (isMobile()) {
-        accordionContainer.style.transform =
-          "translateX(-" + currentCard * 100 + "%)";
-      } else {
-        accordionContainer.style.transform = "";
-      }
+  function isCarouselMode() {
+    return window.matchMedia("(max-width: 1440px)").matches;
+  }
 
-      cards.forEach(function (card, index) {
-        if (index !== currentCard) {
-          card.classList.remove("is-flipped");
-        }
-      });
-    }
+  function updateArrows() {
+    if (!prevBtn || !nextBtn) return;
 
-    function goToCard(index) {
-      currentCard = Math.max(0, Math.min(index, cards.length - 1));
-      updateCarousel();
-    }
+    prevBtn.disabled = currentCard === 0;
+    nextBtn.disabled = currentCard === cards.length - 1;
 
-    function handleSwipe(diffX, diffY) {
-      if (!isMobile()) return;
+    prevBtn.classList.toggle("is-disabled", currentCard === 0);
+    nextBtn.classList.toggle("is-disabled", currentCard === cards.length - 1);
+  }
 
-      if (Math.abs(diffX) < 45 || Math.abs(diffX) < Math.abs(diffY)) {
-        return;
-      }
+  function updateCarousel() {
+    if (isCarouselMode()) {
+      var firstCardOffset = cards[0].offsetLeft;
+      var activeCardOffset = cards[currentCard].offsetLeft;
+      var offset = activeCardOffset - firstCardOffset;
 
-      suppressClickUntil = Date.now() + 350;
-
-      var activeCard = cards[currentCard];
-      var direction = diffX < 0 ? 1 : -1;
-
-      if (!activeCard.classList.contains("is-flipped")) {
-        activeCard.classList.add("is-flipped");
-        return;
-      }
-
-      activeCard.classList.remove("is-flipped");
-      goToCard(currentCard + direction);
+      accordionContainer.style.transform = "translate3d(-" + offset + "px, 0, 0)";
+    } else {
+      accordionContainer.style.transform = "";
     }
 
     cards.forEach(function (card, index) {
-      card.addEventListener("click", function () {
-        if (Date.now() < suppressClickUntil) return;
-
-        if (isMobile()) {
-          if (index === currentCard) {
-            card.classList.toggle("is-flipped");
-          }
-        } else {
-          card.classList.toggle("is-flipped");
-        }
-      });
+      if (index !== currentCard) {
+        card.classList.remove("is-flipped");
+      }
     });
 
-    if (window.PointerEvent) {
-      accordionContainer.addEventListener("pointerdown", function (event) {
-        if (!isMobile()) return;
+    updateArrows();
+  }
 
-        isDragging = true;
-        startX = event.clientX;
-        startY = event.clientY;
+  function goToCard(index) {
+    currentCard = Math.max(0, Math.min(index, cards.length - 1));
+    updateCarousel();
+  }
 
-        if (accordionContainer.setPointerCapture) {
-          try {
-            accordionContainer.setPointerCapture(event.pointerId);
-          } catch (error) {
-            // Evita erro em navegadores que não suportam captura corretamente.
-          }
+  function handleSwipe(diffX, diffY) {
+    if (!isCarouselMode()) return;
+
+    if (Math.abs(diffX) < 45 || Math.abs(diffX) < Math.abs(diffY)) {
+      return;
+    }
+
+    suppressClickUntil = Date.now() + 350;
+
+    var activeCard = cards[currentCard];
+    var direction = diffX < 0 ? 1 : -1;
+
+    if (!activeCard.classList.contains("is-flipped")) {
+      activeCard.classList.add("is-flipped");
+      return;
+    }
+
+    activeCard.classList.remove("is-flipped");
+    goToCard(currentCard + direction);
+  }
+
+  cards.forEach(function (card, index) {
+    card.addEventListener("click", function () {
+      if (Date.now() < suppressClickUntil) return;
+
+      if (isCarouselMode()) {
+        if (index === currentCard) {
+          card.classList.toggle("is-flipped");
+        } else {
+          goToCard(index);
         }
-      });
+      } else {
+        card.classList.toggle("is-flipped");
+      }
+    });
+  });
 
-      accordionContainer.addEventListener("pointerup", function (event) {
-        if (!isMobile() || !isDragging) return;
+  if (window.PointerEvent) {
+    accordionContainer.addEventListener("pointerdown", function (event) {
+      if (!isCarouselMode()) return;
 
-        isDragging = false;
+      isDragging = true;
+      startX = event.clientX;
+      startY = event.clientY;
 
-        var endX = event.clientX;
-        var endY = event.clientY;
+      if (accordionContainer.setPointerCapture) {
+        try {
+          accordionContainer.setPointerCapture(event.pointerId);
+        } catch (error) {}
+      }
+    });
 
-        var diffX = endX - startX;
-        var diffY = endY - startY;
+    accordionContainer.addEventListener("pointerup", function (event) {
+      if (!isCarouselMode() || !isDragging) return;
+
+      isDragging = false;
+
+      var diffX = event.clientX - startX;
+      var diffY = event.clientY - startY;
+
+      handleSwipe(diffX, diffY);
+    });
+
+    accordionContainer.addEventListener("pointercancel", function () {
+      isDragging = false;
+    });
+  } else {
+    accordionContainer.addEventListener(
+      "touchstart",
+      function (event) {
+        if (!isCarouselMode()) return;
+
+        startX = event.touches[0].clientX;
+        startY = event.touches[0].clientY;
+      },
+      { passive: true }
+    );
+
+    accordionContainer.addEventListener(
+      "touchend",
+      function (event) {
+        if (!isCarouselMode()) return;
+
+        var diffX = event.changedTouches[0].clientX - startX;
+        var diffY = event.changedTouches[0].clientY - startY;
 
         handleSwipe(diffX, diffY);
-      });
-
-      accordionContainer.addEventListener("pointercancel", function () {
-        isDragging = false;
-      });
-    } else {
-      accordionContainer.addEventListener(
-        "touchstart",
-        function (event) {
-          if (!isMobile()) return;
-
-          startX = event.touches[0].clientX;
-          startY = event.touches[0].clientY;
-        },
-        { passive: true }
-      );
-
-      accordionContainer.addEventListener(
-        "touchend",
-        function (event) {
-          if (!isMobile()) return;
-
-          var endX = event.changedTouches[0].clientX;
-          var endY = event.changedTouches[0].clientY;
-
-          var diffX = endX - startX;
-          var diffY = endY - startY;
-
-          handleSwipe(diffX, diffY);
-        },
-        { passive: true }
-      );
-    }
-
-    window.addEventListener("resize", function () {
-      goToCard(currentCard);
-    });
-
-    var prevBtn = document.getElementById("carouselPrev");
-    var nextBtn = document.getElementById("carouselNext");
-
-    if (prevBtn) {
-      prevBtn.addEventListener("click", function () {
-        goToCard(currentCard - 1);
-      });
-    }
-
-    if (nextBtn) {
-      nextBtn.addEventListener("click", function () {
-        goToCard(currentCard + 1);
-      });
-    }
-
-    goToCard(0);
+      },
+      { passive: true }
+    );
   }
+
+  if (prevBtn) {
+    prevBtn.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      goToCard(currentCard - 1);
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      goToCard(currentCard + 1);
+    });
+  }
+
+  window.addEventListener("resize", function () {
+    goToCard(currentCard);
+  });
+
+  goToCard(0);
+}
 
   /* ---------- Carrossel infinito de clientes ---------- */
   function initClientsMarquee() {
